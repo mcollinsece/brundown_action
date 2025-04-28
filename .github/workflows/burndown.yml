@@ -6,8 +6,6 @@ on:
 jobs:
   burndown:
     runs-on: ubuntu-latest
-    container:
-      image: python:3.11-slim
     permissions:
       contents: write
       issues: read
@@ -16,14 +14,13 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Install dependencies
-        run: |
-          pip install matplotlib requests python-dateutil
-
-      - name: Generate burndown chart
+      - name: Generate charts in Python container
+        uses: docker://python:3.11-slim
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python .github/scripts/burndown.py
+        with:
+          args: |
+            bash -c "pip install matplotlib requests python-dateutil && python .github/scripts/burndown.py"
 
       - name: Commit burndown chart
         run: |
